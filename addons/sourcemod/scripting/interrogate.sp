@@ -1,5 +1,5 @@
 /*
-   - v1.0.1 Working except for on round change
+   - v1.0.2 Changes: Removed menu check to go along with admin menu
 
    -Usage:
    - !intg | !interrogate will create menu of all clients to choose from
@@ -9,9 +9,10 @@
 
 #include <sourcemod>
 #include <sdktools>
+#include <adminmenu>
 #include <multicolors>
 
-#define VERSION "1.0.1"
+#define VERSION "1.0.2"
 #pragma newdecls required
 
 Handle Cvar_Intg = INVALID_HANDLE;
@@ -137,13 +138,6 @@ public Action InterrogateHandler(int client, int args)
       GetClientName(interrogater, interrogaterName, sizeof(interrogaterName));
       CReplyToCommand(client, "{orchid}Interrogate: {darkred}ERROR {default}%s is currently investigating %s. Please try again later when that investigation concludes.", interrogaterName, interrogateeName);
 
-      return Plugin_Handled;
-   }
-
-   if(GetClientMenu(client, INVALID_HANDLE) != MenuSource_None)
-   {
-      //Stop client from trying to pull up another menu with one already open
-      CReplyToCommand(client, "{orchid}Interrogate: {default}ERROR - Cannot display menu as client already has menu open. Please close current menu and try again.");
       return Plugin_Handled;
    }
 
