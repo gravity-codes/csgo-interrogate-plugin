@@ -15,7 +15,7 @@
 #define VERSION "1.0.2"
 #pragma newdecls required
 
-Handle Cvar_Intg = INVALID_HANDLE;
+ConVar Cvar_Intg;
 bool in_interrogation = false;
 int interrogater = 0;
 int interrogatee = 0;
@@ -49,7 +49,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 public void OnMapEnd()
 {
    //Reset all comms on map change
-   if(GetConVarInt(Cvar_Intg) != 1)
+   if(Cvar_Intg.IntValue != 1)
    {
       return;
    }
@@ -63,7 +63,7 @@ public void OnMapEnd()
 
 public void OnClientConnected(int client)
 {
-   if(GetConVarInt(Cvar_Intg) != 1)
+   if(Cvar_Intg.IntValue != 1)
    {
       //Plugin disabled
       return;
@@ -88,7 +88,7 @@ public void OnClientConnected(int client)
 
 public void OnClientDisconnect(int client)
 {
-   if(GetConVarInt(Cvar_Intg) != 1)
+   if(Cvar_Intg.IntValue != 1)
    {
       return;
    }
@@ -111,7 +111,7 @@ public void OnClientDisconnect(int client)
 
 public Action InterrogateHandler(int client, int args)
 {
-   if(GetConVarInt(Cvar_Intg) != 1)
+   if(Cvar_Intg.IntValue != 1)
    {
       //Plugin is disabled
       return Plugin_Stop;
@@ -153,7 +153,7 @@ public Action InterrogateHandler(int client, int args)
       Menu menu = new Menu(InterrogateMenu, MENU_ACTIONS_ALL);
       menu.SetTitle("Multiple Matches Found:");
 
-      for(int i = 1; i < GetClientCount(true); i++)
+      for(int i = 1; i < MaxClients; i++)
       {
          if(!IsClientInGame(i))
          {
@@ -207,11 +207,17 @@ public Action InterrogateHandler(int client, int args)
    Menu menu = new Menu(InterrogateMenu, MENU_ACTIONS_ALL);
    menu.SetTitle("Choose Target");
 
-   for(int target = 1; target <= GetClientCount(true); target++)
+   for(int target = 1; target <= MaxClients; target++)
    {
       if(!IsClientInGame(target) || target == client)
       {
          //Skip if target left or found own client
+         continue;
+      }
+
+      if(CheckCommandAccess(target, "", ADMFLAG_ROOT, true))
+      {
+         //Target has root access
          continue;
       }
 
@@ -230,7 +236,7 @@ public Action InterrogateHandler(int client, int args)
 
 public Action Interrogate(int client, int target)
 {
-   if(GetConVarInt(Cvar_Intg) != 1)
+   if(Cvar_Intg.IntValue != 1)
    {
       return Plugin_Stop;
    }
@@ -247,11 +253,18 @@ public Action Interrogate(int client, int target)
       return Plugin_Handled;
    }
 
+   if(CheckCommandAccess(target, "", ADMFLAG_ROOT, true))
+   {
+      //Target has root acess
+      CReplyToCommand(client, "{orchid}Interrogate: {darkred}ERROR {default}Cannot target clients with root access.");
+      return Plugin_Handled;
+   }
+
    //Set so interrogater and interrogatee can hear each other
    SetListenOverride(client, target, Listen_Yes);
    SetListenOverride(target, client, Listen_Yes);
 
-   for(int i = 1; i <= GetClientCount(true); i++)
+   for(int i = 1; i <= MaxClients; i++)
    {
       if(i == client || i == target || !IsClientInGame(i))
       {
@@ -387,7 +400,7 @@ public void resetListen(int client)
       return;
    }
 
-   for(int i = 1; i <= GetClientCount(true); i++)
+   for(int i = 1; i <= MaxClients; i++)
    {
       if(i == client || !IsClientInGame(i))
       {
@@ -421,7 +434,7 @@ public void NotifyAdmins(int bcuz)
       return;
    }
 
-   for(int i = 1; i < GetClientCount(true); i++)
+   for(int i = 1; i < MaxClients; i++)
    {
       if(CheckCommandAccess(i, "", ADMFLAG_GENERIC, true))
       {
