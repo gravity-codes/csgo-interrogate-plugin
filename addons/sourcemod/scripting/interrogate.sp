@@ -153,7 +153,7 @@ public Action InterrogateHandler(int client, int args)
       Menu menu = new Menu(InterrogateMenu, MENU_ACTIONS_ALL);
       menu.SetTitle("Multiple Matches Found:");
 
-      for(int i = 1; i < MaxClients; i++)
+      for(int i = 1; i <= MaxClients; i++)
       {
          if(!IsClientInGame(i))
          {
@@ -434,7 +434,7 @@ public void NotifyAdmins(int bcuz)
       return;
    }
 
-   for(int i = 1; i < MaxClients; i++)
+   for(int i = 1; i <= MaxClients; i++)
    {
       if(CheckCommandAccess(i, "", ADMFLAG_GENERIC, true))
       {
