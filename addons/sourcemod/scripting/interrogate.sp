@@ -390,6 +390,10 @@ public int EndInterrogateMenu(Menu menu, MenuAction action, int param1, int para
          EndInterrogate("Successfully completed interrogation.");
       }
    }
+   else
+   {
+      EndInterrogate("Menu was interrupted.");
+   }
 }
 
 public void resetListen(int client)
